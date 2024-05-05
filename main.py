@@ -13,6 +13,7 @@ clock = pygame.time.Clock()
 run = True
 scene = "main"
 time_interval = 0
+setup_scene = False
 
 wPawnImg = "Assets/pawn_wh.png"
 wKnightImg = "Assets/knight_wh.png"
@@ -88,11 +89,28 @@ def default_pieces_set():
     for piece in piece_collection:
         piece.setPos(piece_poses[index], board_width)
         index += 1
-default_pieces_set()
 
+def getPosition():
+    global board_height
+    global board_width
+    mx, my = pygame.mouse.get_pos()
+    row = int(my//(board_height/8))
+    col = int(mx//(board_width/8))
+    if row >= 0 and row <=7 and col >= 0 and col <= 7:
+        letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        numbers = [8, 7, 6, 5, 4, 3, 2, 1]
+        position = str(letters[col])+str(numbers[row])
+        return position
+    
+def identifyPieceByPos(pos):
+    for piece in chess_board.pieces:
+        if piece.position == pos:
+            return piece
+    return "NoPiece"
 
 while run:
     chess_board.display_board(screen)
+        
 
     if scene == "main":
         first_scene_sprite_group.draw(screen)
@@ -111,7 +129,54 @@ while run:
             time_interval = 0
     
     if scene == "play":
+        if setup_scene == False:
+            default_pieces_set()   
+            pieceToMove = ""
+            just_clicked = False
+            mouse_coor = "in"
+            setup_scene = True
+        
         chess_board.display_pieces(screen)
+
+        if pygame.mouse.get_pressed()[0] == True and pieceToMove != "NoPiece":
+
+            #select piece if not selected
+            if just_clicked == False:
+                pieceToMove =  identifyPieceByPos(getPosition())             
+                just_clicked = True
+                
+            #if selected, move along if not taken
+            else:
+                if pieceToMove.taken == False:
+                    mx, my = pygame.mouse.get_pos()
+                    pieceToMove.display = False
+                    screen.blit(pieceToMove.display_piece_img, (mx-(pieceToMove.display_piece_img.get_width()/2), my-(pieceToMove.display_piece_img.get_height()/2)))
+
+        if pygame.mouse.get_pressed()[0] == False:
+           
+            if pieceToMove != "NoPiece" and just_clicked == True:
+                #checks if move legal
+                if pieceToMove.checkMoveLegal(getPosition(), chess_board.pieces) == True:
+                         
+                    pieceToTake = identifyPieceByPos(getPosition())
+
+                    #"removes" taken piece by changing pos and visibility
+                    if pieceToTake != "NoPiece" and pieceToTake != pieceToMove:
+                        pieceToTake.taken = True
+                        pieceToTake.setPos("offboard", board_width)
+
+                    #move piece 
+                    pieceToMove.setPos(getPosition(), board_width) 
+
+                #display piece
+                pieceToMove.display = True
+
+
+            pieceToMove = ""
+            just_clicked = False
+           
+        
+        
 
 
     for event in pygame.event.get():
@@ -123,5 +188,6 @@ while run:
         time_interval += 1
 
     pygame.display.update()
-    clock.tick(40)
+    
+    clock.tick(25)
 pygame.quit()

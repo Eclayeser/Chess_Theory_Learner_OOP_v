@@ -11,4 +11,5 @@ class ChessBoard(pygame.sprite.Sprite):
 
     def display_pieces(self, surface):
         for piece in self.pieces:
-            surface.blit(piece.display_piece_img, (piece.x_coor, piece.y_coor))
+            if piece.display == True and piece.taken == False:
+                surface.blit(piece.display_piece_img, (piece.x_coor, piece.y_coor))
