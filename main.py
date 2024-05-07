@@ -15,6 +15,7 @@ scene = "main"
 time_interval = 0
 setup_scene = False
 
+
 wPawnImg = "Assets/pawn_wh.png"
 wKnightImg = "Assets/knight_wh.png"
 wBishopImg = "Assets/bishop_wh.png"
@@ -135,6 +136,7 @@ while run:
             just_clicked = False
             mouse_coor = "in"
             setup_scene = True
+            turn = "white"
         
         chess_board.display_pieces(screen)
 
@@ -145,16 +147,17 @@ while run:
                 pieceToMove =  identifyPieceByPos(getPosition())             
                 just_clicked = True
                 
-            #if selected, move along if not taken
+            #if selected, move along if not taken and appropriate colour
             else:
-                if pieceToMove.taken == False:
-                    mx, my = pygame.mouse.get_pos()
-                    pieceToMove.display = False
-                    screen.blit(pieceToMove.display_piece_img, (mx-(pieceToMove.display_piece_img.get_width()/2), my-(pieceToMove.display_piece_img.get_height()/2)))
+                if pieceToMove.colour == turn:
+                    if pieceToMove.taken == False:
+                        mx, my = pygame.mouse.get_pos()
+                        pieceToMove.display = False
+                        screen.blit(pieceToMove.display_piece_img, (mx-(pieceToMove.display_piece_img.get_width()/2), my-(pieceToMove.display_piece_img.get_height()/2)))
 
         if pygame.mouse.get_pressed()[0] == False:
            
-            if pieceToMove != "NoPiece" and just_clicked == True:
+            if pieceToMove != "NoPiece" and just_clicked == True and pieceToMove.colour == turn:
                 #checks if move legal
                 if pieceToMove.checkMoveLegal(getPosition(), chess_board.pieces) == True:
                          
@@ -167,6 +170,12 @@ while run:
 
                     #move piece 
                     pieceToMove.setPos(getPosition(), board_width) 
+
+                    if turn == "white":
+                        turn = "black"
+                    else:
+                        turn = "white"
+                
 
                 #display piece
                 pieceToMove.display = True
