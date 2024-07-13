@@ -255,7 +255,7 @@ while run:
             #chess_opening = {"player":"white", "opening":"Bird's", "main_variation":"From's Gambit", "side_variation":"Variation #1", "white": ["f2|f4", "f4:e5", "e5:d6"], "black": ["e7|e5", "d7|d6"]}
             chess_opening_beta = produce_dictionary_for_openings(search_opening)
             #chess_opening_beta = {"player":"white", "opening":"Bird's", "main_variation":"From's Gambit", "side_variations":["Variation #1", "Variation #2"], "Variation #1": {"white": ["f2|f4", "f4:e5", "e5:d6"], "black": ["e7|e5", "d7|d6"]}, "Variation #2": {"white": ["f2|f4", "f4:e5", "d2|d4"], "black": ["e7|e5", "d7|d5"]}}
-            print(chess_opening_beta)
+            #print(chess_opening_beta)
 
         if back_btn.check_clicked() and time_interval > 3:
             scene = "openings"

@@ -15,6 +15,10 @@ class OpeningsFileHandler:
         all_data = self.file_open.read()
         self.close_file()
 
+        pos_1 = all_data.find("///")
+        pos_2 = all_data[pos_1+3:].find("///") + 3
+        all_data = all_data[pos_2+3:]
+
         traversed = False
         work_data = all_data
         openings_list = []

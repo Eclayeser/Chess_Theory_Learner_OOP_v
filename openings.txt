@@ -1,4 +1,4 @@
-
+///instructions: openings must be separated by '{' and '}'; opening names must be separated by '[' and ']'; main variation names must be separated by '/' and '\'; side variation names must be separated by '(' and ')'; turns must be separated by '~' and '~'; moves must be as follows:  number and dot, no spaces, move white (from, if takes ":" if not - "|", to), single space, move black (from, if takes ":" if not - "|", to),, all moves separates by any number of spaces,, move absense ,must be represented by a '$';; inside opening (structure): turn -> opening_name ->-> main_variations ->-> side_variations -> moves///
 {
 ~For White~
 
