@@ -2,6 +2,8 @@ import pygame
 import chessboardExt
 import piecesExt
 import button
+import time
+import random
 
 pygame.init()
 
@@ -14,7 +16,9 @@ run = True
 scene = "main"
 time_interval = 0
 setup_scene = False
+WHITE = (255, 255, 255)
 
+text_font_arial_small = pygame.font.SysFont("Arial", 35, bold=True)
 
 wPawnImg = "Assets/pawn_wh.png"
 wKnightImg = "Assets/knight_wh.png"
@@ -35,12 +39,28 @@ chess_board = chessboardExt.ChessBoard("chess_board.png", board_width, board_hei
 play_btn = button.Button(pygame.image.load("Assets/play_btn_1.png"), pygame.image.load("Assets/play_btn_2.png"), 90, 100, 0.6)
 openings_btn = button.Button(pygame.image.load("Assets/openings_btn_1.png"), pygame.image.load("Assets/openings_btn_2.png"), 90, 275, 0.6)
 other_btn = button.Button(pygame.image.load("Assets/other_btn_1.png"), pygame.image.load("Assets/other_btn_2.png"), 90, 450, 0.6)
+back_btn = button.Button(pygame.image.load("Assets/back_btn_1.png"), pygame.image.load("Assets/back_btn_2.png"), 20, 650, 0.2)
+next_btn = button.Button(pygame.image.load("Assets/next_btn_1.png"), pygame.image.load("Assets/next_btn_2.png"), 550, 650, 0.2)
 
-first_scene_sprite_group = pygame.sprite.Group()
-first_scene_sprite_group.add(play_btn, openings_btn, other_btn)
+main_scene_sprite_group = pygame.sprite.Group()
+openings_scene_sprite_group = pygame.sprite.Group()
+main_vars_scene_sprite_group = pygame.sprite.Group()
+practice_opening_scene_sprite_group = pygame.sprite.Group()
+main_scene_sprite_group.add(play_btn, openings_btn, other_btn)
+
+
+#buttons for openings and vars
+birds_opening_btn = button.Button(pygame.image.load("Assets/birds_btn_1.png"), pygame.image.load("Assets/birds_btn_2.png"), 20, 20, 0.4)
+froms_gambit_btn = button.Button(pygame.image.load("Assets/froms_btn_1.png"), pygame.image.load("Assets/froms_btn_2.png"), 20, 20, 0.4)
+
+openings_scene_sprite_group.add(back_btn, birds_opening_btn)
+main_vars_scene_sprite_group.add(back_btn)
+practice_opening_scene_sprite_group.add(back_btn, next_btn)
 
 
 def default_pieces_set():
+    chess_board.pieces = []
+
     white_king = piecesExt.ChessPiece(wKingImg, "king", "white", chess_board)
     white_queen = piecesExt.ChessPiece(wQueenImg, "queen", "white", chess_board)
     white_rook_1 = piecesExt.ChessPiece(wRookImg, "rook", "white", chess_board)
@@ -109,13 +129,18 @@ def identifyPieceByPos(pos):
             return piece
     return "NoPiece"
 
+
+
 while run:
+    screen.fill((0,0,0))
     chess_board.display_board(screen)
         
 
     if scene == "main":
-        first_scene_sprite_group.draw(screen)
-        first_scene_sprite_group.update()
+        
+        main_scene_sprite_group.draw(screen)
+        main_scene_sprite_group.update()
+        
 
         if play_btn.check_clicked() and time_interval > 3:
             scene = "play"
@@ -155,6 +180,9 @@ while run:
                         pieceToMove.display = False
                         screen.blit(pieceToMove.display_piece_img, (mx-(pieceToMove.display_piece_img.get_width()/2), my-(pieceToMove.display_piece_img.get_height()/2)))
 
+        #if pygame.mouse.get_pressed()[0] == True and pieceToMove != "NoPiece":
+
+
         if pygame.mouse.get_pressed()[0] == False:
            
             if pieceToMove != "NoPiece" and just_clicked == True and pieceToMove.colour == turn:
@@ -175,7 +203,9 @@ while run:
                         turn = "black"
                     else:
                         turn = "white"
-                
+
+                    
+                    
 
                 #display piece
                 pieceToMove.display = True
@@ -183,10 +213,184 @@ while run:
 
             pieceToMove = ""
             just_clicked = False
-           
-        
-        
 
+
+    if scene == "openings":
+        openings_scene_sprite_group.draw(screen)
+        openings_scene_sprite_group.update()
+
+        if birds_opening_btn.check_clicked() and time_interval > 3:
+            scene = "bird's"
+            time_interval = 0
+            main_vars_scene_sprite_group.add(froms_gambit_btn)
+            search_opening = scene
+
+        if back_btn.check_clicked() and time_interval > 3:
+            scene = "main"
+            time_interval = 0
+            
+
+    if scene == "bird's":
+        main_vars_scene_sprite_group.draw(screen)
+        main_vars_scene_sprite_group.update()
+
+        if froms_gambit_btn.check_clicked() and time_interval > 3:
+            scene = "practice opening"
+            search_opening = search_opening + ":" + "from's gambit"
+            time_interval = 0
+            #following must be generated according to what opening was chosen and its variation using file handler + randomise side variations
+            #chess_opening = {"player":"white", "opening":"Bird's", "main_variation":"From's Gambit", "side_variation":"Variation #1", "white": ["f2|f4", "f4:e5", "e5:d6"], "black": ["e7|e5", "d7|d6"]}
+            chess_opening_beta = {"player":"white", "opening":"Bird's", "main_variation":"From's Gambit", "side_variations":["Variation #1", "Variation #2"], "Variation #1": {"white": ["f2|f4", "f4:e5", "e5:d6"], "black": ["e7|e5", "d7|d6"]}, "Variation #2": {"white": ["f2|f4", "f4:e5", "d2|d4"], "black": ["e7|e5", "d7|d5"]}}
+            
+        if back_btn.check_clicked() and time_interval > 3:
+            scene = "openings"
+            time_interval = 0
+            main_vars_scene_sprite_group.remove(froms_gambit_btn)
+
+    if scene == "practice opening":
+        def correct_move(piece, moveTo, opening, variation, move_num):
+            correct_move_full = opening[variation][opening["player"]][move_num-1]
+            
+            if "|" in correct_move_full:
+                position = correct_move_full.find("|")
+
+            elif ":" in correct_move_full:
+                position = correct_move_full.find(":")
+            
+            #pawn
+            if len(correct_move_full[:position]) == 2:
+                correct_move_from = correct_move_full[:position]
+                correct_move_to = correct_move_full[position+1:]
+                correct_move_type = "pawn"
+                    
+                    
+
+            print(correct_move_type, correct_move_from, correct_move_to)
+            print(piece.type, piece.position, moveTo)
+
+            if piece.type == correct_move_type and piece.position == correct_move_from and moveTo == correct_move_to:
+                return True
+            
+            else:
+                return False
+
+        def perform_opponent_move(opening, variation, move_num):
+            if opening["player"] == "white":
+                move_full = opening[variation]["black"][move_num-1]
+            else:
+                move_full = opening[variation]["white"][move_num-1]
+            
+            if "|" in move_full:
+                position = move_full.find("|")
+                take = False
+
+            elif ":" in move_full:
+                position = move_full.find(":")
+                take = True
+            
+            #pawn
+            if len(move_full[:position]) == 2:
+                move_from = move_full[:position]
+                move_to = move_full[position+1:]
+                
+            return move_from, move_to, take
+
+        def choose_variation(opening, current_var):
+            vars = opening["side_variations"]
+            if current_var != None:
+                crit_pos = vars.index(current_var)
+                numbers = [i for i in range(0, len(vars))]
+                numbers.remove(crit_pos)
+                chosen_num = numbers[random.randint(0, len(numbers)-1)]
+                chosen_var = vars[chosen_num]
+            else:
+                chosen_var = vars[random.randint(0, len(vars)-1)]
+            print (chosen_var)
+            return chosen_var
+
+        if setup_scene == False:           
+            default_pieces_set()   
+            pieceToMove = ""
+            just_clicked = False
+            text_opening_name_surface = text_font_arial_small.render(str(chess_opening_beta["opening"])+": "+str(chess_opening_beta["main_variation"]), True, (WHITE))
+            setup_scene = True
+            turn = chess_opening_beta["player"]
+            move = 1
+            variation_chosen = choose_variation(chess_opening_beta, None)
+        
+        chess_board.display_pieces(screen)
+        practice_opening_scene_sprite_group.draw(screen)
+        practice_opening_scene_sprite_group.update()
+        screen.blit(text_opening_name_surface, (120, 645))
+
+        if pygame.mouse.get_pressed()[0] == True and pieceToMove != "NoPiece":
+
+            #select piece if not selected
+            if just_clicked == False:
+                pieceToMove =  identifyPieceByPos(getPosition())             
+                just_clicked = True
+                
+            #if selected, move along if not taken and appropriate colour
+            else:
+                if pieceToMove.colour == turn:
+                    if pieceToMove.taken == False:
+                        mx, my = pygame.mouse.get_pos()
+                        pieceToMove.display = False
+                        screen.blit(pieceToMove.display_piece_img, (mx-(pieceToMove.display_piece_img.get_width()/2), my-(pieceToMove.display_piece_img.get_height()/2)))
+
+        #if pygame.mouse.get_pressed()[0] == True and pieceToMove != "NoPiece":
+
+
+        if pygame.mouse.get_pressed()[0] == False:
+           
+            if pieceToMove != "NoPiece" and just_clicked == True and pieceToMove.colour == turn:
+                #checks if move legal
+                if correct_move(pieceToMove, getPosition(), chess_opening_beta, variation_chosen, move) == True:
+                         
+                    pieceToTake = identifyPieceByPos(getPosition())
+
+                    #"removes" taken piece by changing pos and visibility
+                    if pieceToTake != "NoPiece" and pieceToTake != pieceToMove:
+                        pieceToTake.taken = True
+                        pieceToTake.setPos("offboard", board_width)
+
+                    #move piece 
+                    pieceToMove.setPos(getPosition(), board_width) 
+
+                    
+                    #perform opponent's move if not finished theory
+                    if move == len(chess_opening_beta[variation_chosen][turn]):
+                        default_pieces_set()
+                        move = 1
+                        variation_chosen = choose_variation(chess_opening_beta, variation_chosen)
+                    else:
+                        pos_from, pos_to, pieceTaken = perform_opponent_move(chess_opening_beta, variation_chosen, move)
+                        pieceToMove_opponent = identifyPieceByPos(pos_from)
+                        print(pos_from)
+                        print(pieceToMove_opponent)
+                        if pieceTaken == True:
+                            pieceToTake_opponent = identifyPieceByPos(pos_to)
+                            pieceToTake_opponent.taken = True
+                            pieceToTake_opponent.setPos("offboard", board_width)
+                        pieceToMove_opponent.setPos(pos_to, board_width) 
+                        move += 1
+
+                #display piece
+                pieceToMove.display = True
+
+
+            pieceToMove = ""
+            just_clicked = False    
+        
+        if back_btn.check_clicked() and time_interval > 3:
+            
+            scene = chess_opening_beta["opening"].lower()
+            time_interval = 0
+
+        if next_btn.check_clicked() and time_interval > 3:
+            
+            setup_scene = False 
+            time_interval = 0
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

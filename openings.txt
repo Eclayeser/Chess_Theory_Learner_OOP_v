@@ -1,0 +1,29 @@
+{
+~For White~
+
+[Bird's]
+
+/From's Gambit\
+(Variation 1)
+
+#1.f4 e5 2.f:e d6 3.e:d B:d6 
+4.Nf3 g5 5.g3 g4 6.Nh4 Ne7 
+7.d4 Ng6 8.N:g6 h:g 9.Qd3#
+
+(Variation 2)
+
+#1.f4 e5 2.f:e d6 3.e:d B:d6 
+4.Nf3 g5 5.g3 g4 6.Nh4 Be7
+7.Ng2 h5 8.d4 h4 9.Bf4 h3
+10.Ne3#
+
+/What Gambit\
+
+}
+
+{
+~For Black~
+[Opacha]
+/Beleberda\
+Moves
+}
