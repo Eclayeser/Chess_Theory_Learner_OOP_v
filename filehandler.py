@@ -1,14 +1,9 @@
-import time
+
 class OpeningsFileHandler:
     def __init__(self, givenName):
         self.file = givenName
-        
-    def find_opening(self, file_name):
-        #must return dictionary in form: 
-        #chess_opening_beta = {"player":"white", "opening":"Bird's", "main_variation":"From's Gambit", "side_variations":["Variation #1", "Variation #2"], "Variation #1": {"white": ["f2|f4", "f4:e5", "e5:d6"], "black": ["e7|e5", "d7|d6"]}, "Variation #2": {"white": ["f2|f4", "f4:e5", "d2|d4"], "black": ["e7|e5", "d7|d5"]}}
-        pass
-        
-    
+               
+   
     def open_file_to_read(self):
         self.file_open = open(self.file, "r")
     
@@ -49,6 +44,10 @@ class OpeningsFileHandler:
                 pos_turn_sign_1 = single_op.find("~")
                 pos_turn_sign_2 = single_op[pos_turn_sign_1+1:].find("~")
                 for_who = single_op[pos_turn_sign_1+1:][:pos_turn_sign_2]
+                if "White" in for_who:
+                    for_who = "white"
+                elif "Black" in for_who:
+                    for_who = "black"
 
                 traverse_single = False
                 found_var = False
@@ -71,6 +70,7 @@ class OpeningsFileHandler:
                     else:
                         check_var_name = work_op[pos_first_forwsl+1:pos_first_backsl]
                         full_check_name = (check_op_name + ": " +check_var_name).lower()
+                        print(full_check_name)
                         #print(full_check_name)
                         
                         #if op and var found
@@ -104,14 +104,14 @@ class OpeningsFileHandler:
             return list_result
         
         elif traversed_list == True:
-            return False
+            return False, False, False, False,
 
     def split_variations(self, text_data):
         #output: list of var names, list of white moves, list of black moves
         vars_list = []
         white_moves = []
         black_moves = []
-        all_moves = []
+        dictionary = {}
 
         work_data = text_data
         traversed_vars = False
@@ -128,49 +128,72 @@ class OpeningsFileHandler:
                 
                 
                 work_data = work_data[pos_closed_br+1:]
-                """
+                
+                
                 next_br = work_data.find("(")
-                moves = work_data[:next_br]
+                if next_br != -1:
+                    moves = work_data[:next_br]
+
+                else:
+                    moves = work_data
+                
                 moves_traversed = False
                 move_num = 1
                 moves_left = moves
+                #print(moves_left)
+
                 while moves_traversed == False:
-                    print("-----------------")
-                    print(moves_left)
-                    time.sleep(2)
+                    
                     move_num_str = str(move_num)+"."
                     move_num_str_next = str(move_num+1)+"."
-                    if move_num_str in moves_left:
-                        p_1 = moves_left.find(move_num_str)
-                        p_2 = moves_left.find(move_num_str_next)
-                        double_move = moves_left[p_1+2:p_2]
 
-                        lim_1 = double_move.find(" ")
-                        white_moves.append(double_move[:lim_1])
+                    extr_len_1 = len(move_num_str)
+                    extr_len_2 = len(move_num_str_next)
+                    
+                    p_1 = moves_left.find(move_num_str)
+                    p_2 = moves_left.find(move_num_str_next)
 
-                        black_move = double_move[lim_1+1:]
-                        lim_2 = black_move.find(" ")
-                        black_moves.append(black_move[:lim_2])
+                    if p_2 == -1:
+                        double_move = moves_left[p_1+extr_len_1:]
+                        moves_traversed = True
+                        
 
-                        moves_left = moves_left[p_2:]
+                    #not last move
+                    else:
+                        double_move = moves_left[p_1+extr_len_1:p_2]
+
+                    #print(double_move)    
+
+                    lim_1 = double_move.find(" ")
+                    white_moves.append(double_move[:lim_1])
+                    #print(white_moves)
+
+                    black_move = double_move[lim_1+1:]
+                    lim_2 = black_move.find(" ")
+                    black_moves.append(black_move[:lim_2])
+
+                    moves_left = moves_left[p_2:]
+                    move_num += 1
+                    #print(moves_left)
 
                
 
-                    else:
-                        moves_traversed = True
+                    
 
-                """  
-
+                 
+                dictionary[new_variation] = {"white": white_moves, "black": black_moves}
+                white_moves =[]
+                black_moves =[]
 
             #traversed vars
             else:
                 traversed_vars = True
 
-        return vars_list#, white_moves, black_moves
+            
+            #print(new_variation)
+
+        return vars_list, dictionary
 
             
 
 
-openings_database = OpeningsFileHandler("openings.txt")
-list_result = openings_database.search_for_name("bird's: from's gambit", openings_database.separate_openings())
-print(openings_database.split_variations(list_result[3]))

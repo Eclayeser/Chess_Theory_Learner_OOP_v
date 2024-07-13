@@ -4,9 +4,12 @@ import piecesExt
 import button
 import time
 import random
+import filehandler
 
 pygame.init()
 
+openings_handler = filehandler.OpeningsFileHandler("openings.txt")
+openings_list = openings_handler.separate_openings()
 board_width = 8*80
 board_height = 8*80
 screen = pygame.display.set_mode((board_width, board_height + 50))
@@ -129,7 +132,17 @@ def identifyPieceByPos(pos):
             return piece
     return "NoPiece"
 
-
+def produce_dictionary_for_openings(name):
+    #example of output: chess_opening_beta = {"player":"white", "opening":"Bird's", "main_variation":"From's Gambit", "side_variations":["Variation #1", "Variation #2"], "Variation #1": {"white": ["f2|f4", "f4:e5", "e5:d6"], "black": ["e7|e5", "d7|d6"]}, "Variation #2": {"white": ["f2|f4", "f4:e5", "d2|d4"], "black": ["e7|e5", "d7|d5"]}}
+    colour, op_name, main_var_name, moves = openings_handler.search_for_name(name, openings_list)
+    if colour == False:
+        return False
+    else:
+        side_variations, dict_moves = openings_handler.split_variations(moves)
+        result_dict = {"player": colour, "opening": op_name, "main_variation": main_var_name, "side_variations": side_variations}
+        for side_var in side_variations:
+            result_dict[side_var] = dict_moves[side_var]
+        return result_dict
 
 while run:
     screen.fill((0,0,0))
@@ -223,7 +236,7 @@ while run:
             scene = "bird's"
             time_interval = 0
             main_vars_scene_sprite_group.add(froms_gambit_btn)
-            search_opening = scene
+            search_opening = "bird's"
 
         if back_btn.check_clicked() and time_interval > 3:
             scene = "main"
@@ -236,12 +249,14 @@ while run:
 
         if froms_gambit_btn.check_clicked() and time_interval > 3:
             scene = "practice opening"
-            search_opening = search_opening + ":" + "from's gambit"
+            search_opening = search_opening + ": " + "from's gambit"
             time_interval = 0
             #following must be generated according to what opening was chosen and its variation using file handler + randomise side variations
             #chess_opening = {"player":"white", "opening":"Bird's", "main_variation":"From's Gambit", "side_variation":"Variation #1", "white": ["f2|f4", "f4:e5", "e5:d6"], "black": ["e7|e5", "d7|d6"]}
-            chess_opening_beta = {"player":"white", "opening":"Bird's", "main_variation":"From's Gambit", "side_variations":["Variation #1", "Variation #2"], "Variation #1": {"white": ["f2|f4", "f4:e5", "e5:d6"], "black": ["e7|e5", "d7|d6"]}, "Variation #2": {"white": ["f2|f4", "f4:e5", "d2|d4"], "black": ["e7|e5", "d7|d5"]}}
-            
+            chess_opening_beta = produce_dictionary_for_openings(search_opening)
+            #chess_opening_beta = {"player":"white", "opening":"Bird's", "main_variation":"From's Gambit", "side_variations":["Variation #1", "Variation #2"], "Variation #1": {"white": ["f2|f4", "f4:e5", "e5:d6"], "black": ["e7|e5", "d7|d6"]}, "Variation #2": {"white": ["f2|f4", "f4:e5", "d2|d4"], "black": ["e7|e5", "d7|d5"]}}
+            print(chess_opening_beta)
+
         if back_btn.check_clicked() and time_interval > 3:
             scene = "openings"
             time_interval = 0
@@ -262,11 +277,24 @@ while run:
                 correct_move_from = correct_move_full[:position]
                 correct_move_to = correct_move_full[position+1:]
                 correct_move_type = "pawn"
-                    
+
+            if len(correct_move_full[:position]) == 3:
+                correct_move_from = correct_move_full[1:position]
+                correct_move_to = correct_move_full[position+1:]
+                if correct_move_full[0] == "B":
+                    correct_move_type = "bishop"
+                elif correct_move_full[0] == "N":
+                    correct_move_type = "knight"
+                elif correct_move_full[0] == "R":
+                    correct_move_type = "rook"
+                elif correct_move_full[0] == "Q":
+                    correct_move_type = "queen"
+                elif correct_move_full[0] == "K":
+                    correct_move_type = "king"
                     
 
-            print(correct_move_type, correct_move_from, correct_move_to)
-            print(piece.type, piece.position, moveTo)
+            #print(correct_move_type, correct_move_from, correct_move_to)
+            #print(piece.type, piece.position, moveTo)
 
             if piece.type == correct_move_type and piece.position == correct_move_from and moveTo == correct_move_to:
                 return True
@@ -292,6 +320,10 @@ while run:
             if len(move_full[:position]) == 2:
                 move_from = move_full[:position]
                 move_to = move_full[position+1:]
+
+            elif len(move_full[:position]) == 3:
+                move_from = move_full[1:position]
+                move_to = move_full[position+1:]
                 
             return move_from, move_to, take
 
@@ -305,7 +337,7 @@ while run:
                 chosen_var = vars[chosen_num]
             else:
                 chosen_var = vars[random.randint(0, len(vars)-1)]
-            print (chosen_var)
+            #print (chosen_var)
             return chosen_var
 
         if setup_scene == False:           
@@ -359,15 +391,16 @@ while run:
 
                     
                     #perform opponent's move if not finished theory
-                    if move == len(chess_opening_beta[variation_chosen][turn]):
+                    print(chess_opening_beta[variation_chosen]["black"][move-1])
+                    if chess_opening_beta[variation_chosen]["black"][move-1] == "$":
                         default_pieces_set()
                         move = 1
                         variation_chosen = choose_variation(chess_opening_beta, variation_chosen)
                     else:
                         pos_from, pos_to, pieceTaken = perform_opponent_move(chess_opening_beta, variation_chosen, move)
                         pieceToMove_opponent = identifyPieceByPos(pos_from)
-                        print(pos_from)
-                        print(pieceToMove_opponent)
+                        #print(pos_from)
+                        #print(pieceToMove_opponent)
                         if pieceTaken == True:
                             pieceToTake_opponent = identifyPieceByPos(pos_to)
                             pieceToTake_opponent.taken = True
