@@ -19,7 +19,8 @@ class ChessPiece(pygame.sprite.Sprite):
         board.pieces.append(self)
 
 
-    def setPos(self, pos, boardsize):
+    def setPos(self, pos, boardsize, pov):
+        #place piece on a desired square or place off the board
         if pos != "offboard":
             letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
             numbers = ["1", "2", "3", "4", "5", "6", "7", "8"]
@@ -28,17 +29,23 @@ class ChessPiece(pygame.sprite.Sprite):
             else:
                 raise ValueError("Invalid piece position:", self.name)
         
-            self.calc_coordinates(boardsize, boardsize)
+            self.calc_coordinates(boardsize, boardsize, pov)
 
-            #check for castling
+            #check for castling (intended to be used in PLAY mode)
             if self.type == "rook" or self.type == "king" and self.has_moved < 1:
                 self.has_moved += 1
+
         else:
             self.position = "offboard"
         
-    def calc_coordinates(self, board_w, board_h):
-        letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
-        numbers = ["8", "7", "6", "5", "4", "3", "2", "1"]
+    def calc_coordinates(self, board_w, board_h, pov):
+        #calculate corrcet coords for a piece taking into account player's percpective
+        if pov == "white":
+            letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+            numbers = ["8", "7", "6", "5", "4", "3", "2", "1"]
+        elif pov == "black":
+            letters = ["h", "g", "f", "e", "d", "c", "b", "a"]
+            numbers = ["1", "2", "3", "4", "5", "6", "7", "8"]
         x_coor = 0
         y_coor = 0
         for i in letters:
@@ -50,7 +57,8 @@ class ChessPiece(pygame.sprite.Sprite):
                 self.y_coor = y_coor
             y_coor += round(board_h/8)
 
-    def checkMoveLegal(self, moveTo, piecesToTake): #whose_turn):
+    def checkMoveLegal(self, moveTo, piecesToTake):
+        #used to check if move legal (intended to be used in PLAY mode; incomplete) 
         if moveTo == None: #or whose_turn != self.colour:
             return False
         
@@ -347,6 +355,7 @@ class ChessPiece(pygame.sprite.Sprite):
         return False
     
     def differentColour(self, pieces, to_sq):
+        #assists checkMoveLegal function
         piece_on_to_sq = traceToFindPieces(pieces, to_sq)
         if piece_on_to_sq == None:
             return True
@@ -356,6 +365,7 @@ class ChessPiece(pygame.sprite.Sprite):
     
 
 def traceToFindPieces(pieces, to):
+    #traverse pieces list to see if one exists
     for piece in pieces:
         if piece.position == to:
             return piece

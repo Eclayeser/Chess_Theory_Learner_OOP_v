@@ -8,7 +8,7 @@
 (Variation 1)
 
 #
-1.f2|f4 e7|e5   2.f4:e5 d7|d6   3.e5:d6 Bf8:d6   4.Ng1|f3 g7|g5   5.g2|g3 g5|g4   6.Nf3|h4 Ng8|e7   7.d2|d4 Ne7|g6   8.Nh4:g6 h7:g6   9.Qd1|d3 $  
+1.f2|f4 e7|e5   2.f4:e5 d7|d6   3.e5:d6 Bf8:d6   4.Ng1|f3 g7|g5   5.g2|g3 g5|g4    6.Nf3|h4 Ng8|e7   7.d2|d4 Ne7|g6   8.Nh4:g6 h7:g6   9.Qd1|d3 $  
 #
 
 (Variation 2)
@@ -17,13 +17,25 @@
 1.f2|f4 e7|e5   2.f4:e5 d7|d6   3.e5:d6 Bf8:d6   4.Ng1|f3 g7|g5   5.g2|g3 g5|g4   6.Nf3|h4 Bd6|e7   7.Nh4|g2 h7|h5   8.d2|d4 h5|h4    9.Bc1|f4 h4|h3    10.Ng2|e3 $ 
 #
 
-/What Gambit\
+
 
 }
+
 
 {
 ~For Black~
-[Opacha]
-/Beleberda\
-Moves
+
+[Grunfeld Defence]
+
+/Early h4!\
+
+(Variation 1)
+
+#
+1.d2|d4 Ng8|f6   2.c2|c4 g7|g6   3.h2|h4 c7|c5   4.d4|d5 Bf8|g7   5.Nb1|c3 d7|d6   6.e2|e4 e7|e6   7.Bf1|e2 e6:d5   8.e4:d5 Nb8|d7   9.h4|h5 Nf6:h5   10.Be2:h5 g6:h5   11.Qd1:h5 Nd7|e5
+12.Qh5|e2 Qd8|e7   13.Bc1|h6 Bg7:h6   14.Rh1:h6 Bc8|g4   15.Qe2|e3 O-O-O   16.$ $ 
+#
+
+
 }
+
