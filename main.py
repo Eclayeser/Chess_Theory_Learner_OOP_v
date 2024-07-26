@@ -44,14 +44,15 @@ bQueenImg = "Assets/queen_bl.png"
 bKingImg = "Assets/king_bl.png"
 
 
-chess_board = chessboardExt.ChessBoard("chess_board.png", board_width, board_height)
+chess_board = chessboardExt.ChessBoard("chess_board_empty.png", board_width, board_height)
 
 #general buttons
 play_btn = button.Button(pygame.image.load("Assets/play_btn_1.png"), pygame.image.load("Assets/play_btn_2.png"), 90, 100, 0.6)
 openings_btn = button.Button(pygame.image.load("Assets/openings_btn_1.png"), pygame.image.load("Assets/openings_btn_2.png"), 90, 275, 0.6)
 other_btn = button.Button(pygame.image.load("Assets/other_btn_1.png"), pygame.image.load("Assets/other_btn_2.png"), 90, 450, 0.6)
-back_btn = button.Button(pygame.image.load("Assets/back_btn_1.png"), pygame.image.load("Assets/back_btn_2.png"), 20, 650, 0.2)
+back_btn = button.Button(pygame.image.load("Assets/back_btn_1.png"), pygame.image.load("Assets/back_btn_2.png"), 10, 650, 0.2)
 next_btn = button.Button(pygame.image.load("Assets/next_btn_1.png"), pygame.image.load("Assets/next_btn_2.png"), 550, 650, 0.2)
+hint_btn = button.Button(pygame.image.load("Assets/hint_btn_1.png"), pygame.image.load("Assets/hint_btn_2.png"), 515, 650, 0.2)
 
 
 #buttons for openings and vars
@@ -59,6 +60,7 @@ birds_opening_btn = button.Button(pygame.image.load("Assets/Buttons_ops/birds_bt
 froms_gambit_btn = button.Button(pygame.image.load("Assets/Buttons_ops/froms_btn_1.png"), pygame.image.load("Assets/Buttons_ops/froms_btn_2.png"), 20, 20, 0.4)
 grunfeld_defense_btn = button.Button(pygame.image.load("Assets/Buttons_ops/grunfeld_btn_1.png"), pygame.image.load("Assets/Buttons_ops/grunfeld_btn_2.png"), 20, 80, 0.4)
 early_h4_btn = button.Button(pygame.image.load("Assets/Buttons_ops/h4_btn_1.png"), pygame.image.load("Assets/Buttons_ops/h4_btn_2.png"), 20, 20, 0.4)
+dutch_variation_btn = button.Button(pygame.image.load("Assets/Buttons_ops/dutch_variation_btn_1.png"), pygame.image.load("Assets/Buttons_ops/dutch_variation_btn_2.png"), 20, 80, 0.4)
 
 #create sprite groups
 main_scene_sprite_group = pygame.sprite.Group()
@@ -70,7 +72,7 @@ practice_opening_scene_sprite_group = pygame.sprite.Group()
 main_scene_sprite_group.add(play_btn, openings_btn, other_btn)
 openings_scene_sprite_group.add(back_btn, birds_opening_btn, grunfeld_defense_btn)
 main_vars_scene_sprite_group.add(back_btn)
-practice_opening_scene_sprite_group.add(back_btn, next_btn)
+practice_opening_scene_sprite_group.add(back_btn, next_btn, hint_btn)
 
 
 #general functions
@@ -262,7 +264,7 @@ while run:
         if birds_opening_btn.check_clicked() and time_interval > 3:
             scene = "bird's"
             time_interval = 0
-            main_vars_scene_sprite_group.add(froms_gambit_btn)
+            main_vars_scene_sprite_group.add(froms_gambit_btn, dutch_variation_btn)
             
 
         if grunfeld_defense_btn.check_clicked() and time_interval > 3:
@@ -284,6 +286,12 @@ while run:
         if froms_gambit_btn.check_clicked() and time_interval > 3:
             scene = "practice opening"
             search_opening = "bird's" + ": " + "from's gambit"
+            time_interval = 0
+            chess_opening = produce_dictionary_for_openings(search_opening)
+
+        if dutch_variation_btn.check_clicked() and time_interval > 3:
+            scene = "practice opening"
+            search_opening = "bird's" + ": " + "dutch variation"
             time_interval = 0
             chess_opening = produce_dictionary_for_openings(search_opening)
 
@@ -514,10 +522,12 @@ while run:
             pieceToMove = ""
             just_clicked = False
             text_opening_name_surface = text_font_arial_small.render(str(chess_opening["opening"])+": "+str(chess_opening["main_variation"]), True, (WHITE))
+            text_display_surface = text_opening_name_surface
             move = 1
             variation_chosen = choose_variation(side_vars_list, None)
             default_pieces_set(your_colour)
             setup_scene = True
+            reserved_name = ""
 
             #if first move not yours
             if your_colour == "black":
@@ -528,7 +538,14 @@ while run:
         chess_board.display_pieces(screen)
         practice_opening_scene_sprite_group.draw(screen)
         practice_opening_scene_sprite_group.update()
-        screen.blit(text_opening_name_surface, (120, 645))
+        screen.blit(text_display_surface, (100, 645))
+
+
+        #hint button
+        if hint_btn.check_clicked():
+            move_done = chess_opening[variation_chosen][your_colour][move-1]
+            text_display_surface = text_font_arial_small.render(str(move_done), True, (WHITE))
+
 
         #when clicked
         if pygame.mouse.get_pressed()[0] == True and pieceToMove != "NoPiece":
@@ -591,7 +608,10 @@ while run:
                         if your_colour == "white":
                             move += 1
 
+                        text_display_surface = text_opening_name_surface
+
                 #display piece that was hovering
+                
                 pieceToMove.display = True
 
 
